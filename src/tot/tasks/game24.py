@@ -42,7 +42,18 @@ class Game24Task(Task):
         return self.data[idx]
 
     def test_output(self, idx: int, output: str):
-        expression = output.strip().split('\n')[-1].lower().replace('answer: ', '').split('=')[0]
+        # First try to extract answer from a think/answer format
+        if '<think>' in output:
+            # Find the last occurrence of "Answer:" after the thinking section
+            parts = output.split('Answer:')
+            if len(parts) > 1:
+                expression = parts[-1].strip().split('=')[0]
+            else:
+                return {'r': 0}
+        else:
+            # Original logic for direct answers
+            expression = output.strip().split('\n')[-1].lower().replace('answer: ', '').split('=')[0]
+        
         numbers = re.findall(r'\d+', expression)
         problem_numbers = re.findall(r'\d+', self.data[idx])
         if sorted(numbers) != sorted(problem_numbers):
@@ -90,3 +101,7 @@ class Game24Task(Task):
         value_map = {'impossible': 0.001, 'likely': 1, 'sure': 20}  # TODO: ad hoc
         value = sum(value * value_names.count(name) for name, value in value_map.items())
         return value
+
+    @staticmethod
+    def zero_shot_prompt_wrap(x: str) -> str:
+        return zero_shot_prompt.format(input=x)

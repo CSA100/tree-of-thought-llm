@@ -36,11 +36,13 @@ def get_proposals(task, x, y):
     proposals = gpt(propose_prompt, n=1, stop=None)[0].split('\n')
     return [y + _ + '\n' for _ in proposals]
 
-def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
+def get_samples(task, x, y, n_generate_sample, prompt_sample='standard', stop=None):
     if prompt_sample == 'standard':
         prompt = task.standard_prompt_wrap(x, y)
     elif prompt_sample == 'cot':
         prompt = task.cot_prompt_wrap(x, y)
+    elif prompt_sample == 'standard_zero_shot':
+        prompt = task.zero_shot_prompt_wrap(x)
     else:
         raise ValueError(f'prompt_sample {prompt_sample} not recognized')
     samples = gpt(prompt, n=n_generate_sample, stop=stop)
@@ -48,7 +50,7 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
 
 def solve(args, task, idx, to_print=True):
     global gpt
-    gpt = partial(gpt, model=args.backend, temperature=args.temperature)
+    gpt = partial(gpt, model=args.backend, temperature=args.temperature, max_tokens=args.max_tokens)
     print(gpt)
     x = task.get_input(idx)  # input
     ys = ['']  # current output candidates
@@ -89,7 +91,7 @@ def solve(args, task, idx, to_print=True):
 
 def naive_solve(args, task, idx, to_print=True):
     global gpt
-    gpt = partial(gpt, model=args.backend, temperature=args.temperature)
+    gpt = partial(gpt, model=args.backend, temperature=args.temperature, max_tokens=args.max_tokens)
     print(gpt)
     x = task.get_input(idx)  # input
     ys = get_samples(task, x, '', args.n_generate_sample, args.prompt_sample, stop=None)

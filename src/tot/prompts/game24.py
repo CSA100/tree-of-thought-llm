@@ -132,3 +132,17 @@ impossible
 Input: {input}
 Answer: {answer}
 Judge:'''
+
+zero_shot_prompt = '''Given four numbers, use basic arithmetic operations (+ - * /) to obtain 24. Each number must be used exactly once.
+
+Important formatting requirements:
+1. Start your response with "Answer: "
+2. Write your expression followed by "= 24"
+3. Use parentheses to make the order of operations clear
+4. Do not include any other text or explanations
+
+Example Input: 4 4 6 8
+ExampleAnswer: (4 + 8) * (6 - 4) = 24
+
+Input: {input}
+Answer: '''
